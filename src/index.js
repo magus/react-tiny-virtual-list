@@ -34,6 +34,7 @@ export default class VirtualList extends PureComponent {
     scrollToAlignment: PropTypes.oneOf([ALIGN_START, ALIGN_CENTER, ALIGN_END]),
     scrollDirection: PropTypes.oneOf([DIRECTION_HORIZONTAL, DIRECTION_VERTICAL]).isRequired,
     width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    displayBottomUpwards: PropTypes.bool,
   }
 
   sizeAndPositionManager = new SizeAndPositionManager({
@@ -202,7 +203,8 @@ export default class VirtualList extends PureComponent {
       scrollToAlignment,
       style,
       width,
-      ...props
+      displayBottomUpwards,
+      ...props,
     } = this.props;
     const {offset} = this.state;
     const {start, stop} = this.sizeAndPositionManager.getVisibleRange({
@@ -210,6 +212,14 @@ export default class VirtualList extends PureComponent {
       offset,
       overscanCount,
     });
+    const sizeDirection = sizeProp[scrollDirection];
+    const size = this.sizeAndPositionManager.getTotalSize();
+    const wrapperStyle = {...STYLE_WRAPPER, ...style, width};
+    const innerStyle = {
+      ...STYLE_INNER,
+      [sizeDirection]: size,
+    };
+
     const items = [];
 
     for (let index = start; index <= stop; index++) {
@@ -219,9 +229,26 @@ export default class VirtualList extends PureComponent {
       }));
     }
 
+    if (displayBottomUpwards) {
+      wrapperStyle.maxHeight = height;
+      let offset = height - size;
+      if (offset > 0) wrapperStyle.transform = `translateY(${offset}px)`;
+    } else {
+      wrapperStyle.height = height;
+    }
+
+    if (displayBottomUpwards) innerStyle.minHeight = '0';
+
     return (
-      <div ref={this._getRef} {...props} onScroll={this.handleScroll} style={{...STYLE_WRAPPER, ...style, height, width}}>
-        <div style={{...STYLE_INNER, [sizeProp[scrollDirection]]: this.sizeAndPositionManager.getTotalSize()}}>
+      <div
+        ref={this._getRef}
+        {...props}
+        onScroll={this.handleScroll}
+        style={wrapperStyle}
+      >
+        <div
+          style={innerStyle}
+        >
           {items}
         </div>
       </div>

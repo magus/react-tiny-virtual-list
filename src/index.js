@@ -204,7 +204,7 @@ export default class VirtualList extends PureComponent {
       style,
       width,
       displayBottomUpwards,
-      ...props,
+      ...props
     } = this.props;
     const {offset} = this.state;
     const {start, stop} = this.sizeAndPositionManager.getVisibleRange({
@@ -212,12 +212,11 @@ export default class VirtualList extends PureComponent {
       offset,
       overscanCount,
     });
-    const sizeDirection = sizeProp[scrollDirection];
-    const size = this.sizeAndPositionManager.getTotalSize();
+
     const wrapperStyle = {...STYLE_WRAPPER, ...style, width};
     const innerStyle = {
       ...STYLE_INNER,
-      [sizeDirection]: size,
+      [sizeProp[scrollDirection]]: this.sizeAndPositionManager.getTotalSize(),
     };
 
     const items = [];
@@ -231,8 +230,6 @@ export default class VirtualList extends PureComponent {
 
     if (displayBottomUpwards) {
       wrapperStyle.maxHeight = height;
-      let offset = height - size;
-      if (offset > 0) wrapperStyle.transform = `translateY(${offset}px)`;
     } else {
       wrapperStyle.height = height;
     }

@@ -1,5 +1,6 @@
 import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
+import animateScroll from './animateScroll';
 import SizeAndPositionManager from './SizeAndPositionManager';
 import {
   ALIGN_CENTER,
@@ -35,6 +36,7 @@ export default class VirtualList extends PureComponent {
     scrollDirection: PropTypes.oneOf([DIRECTION_HORIZONTAL, DIRECTION_VERTICAL]).isRequired,
     width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     displayBottomUpwards: PropTypes.bool,
+    animate: PropTypes.bool,
   }
 
   sizeAndPositionManager = new SizeAndPositionManager({
@@ -143,8 +145,20 @@ export default class VirtualList extends PureComponent {
   }
 
   scrollTo(value) {
-    const {scrollDirection} = this.props;
-    this.rootNode[scrollProp[scrollDirection]] = value;
+    const { scrollDirection, animate } = this.props;
+    const currentScroll = this.rootNode[scrollProp[scrollDirection]];
+
+    if (currentScroll === value) return;
+
+    if (!animate) {
+      this.rootNode[scrollProp[scrollDirection]] = value;
+      return;
+    }
+
+    // Animate scroll offset
+    if (this.lastScroll) this.lastScroll.cancel();
+    this.lastScroll = animateScroll(this.rootNode, value, 1000);
+
   }
 
   getOffsetForIndex(index, scrollToAlignment = this.props.scrollToAlignment, itemCount = this.props.itemCount) {
@@ -204,6 +218,7 @@ export default class VirtualList extends PureComponent {
       style,
       width,
       displayBottomUpwards,
+      animate,
       ...props
     } = this.props;
     const {offset} = this.state;
@@ -213,10 +228,12 @@ export default class VirtualList extends PureComponent {
       overscanCount,
     });
 
-    const wrapperStyle = {...STYLE_WRAPPER, ...style, width};
+    const totalSize = this.sizeAndPositionManager.getTotalSize();
+
+    const wrapperStyle = {...STYLE_WRAPPER, ...style, width, height };
     const innerStyle = {
       ...STYLE_INNER,
-      [sizeProp[scrollDirection]]: this.sizeAndPositionManager.getTotalSize(),
+      [sizeProp[scrollDirection]]: totalSize,
     };
 
     const items = [];
@@ -230,11 +247,13 @@ export default class VirtualList extends PureComponent {
 
     if (displayBottomUpwards) {
       wrapperStyle.maxHeight = height;
-    } else {
-      wrapperStyle.height = height;
-    }
+      delete wrapperStyle.height;
 
-    if (displayBottomUpwards) innerStyle.minHeight = '0';
+      innerStyle.minHeight = '0';
+
+      // Transition height up until it maxes out
+      if (animate && totalSize < height) innerStyle.transition = 'height 1s ease';
+    }
 
     return (
       <div

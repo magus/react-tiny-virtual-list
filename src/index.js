@@ -23,6 +23,7 @@ export default class VirtualList extends PureComponent {
     scrollDirection: DIRECTION_VERTICAL,
     width: '100%',
   };
+
   static propTypes = {
     estimatedItemSize: PropTypes.number,
     height: PropTypes.number.isRequired,
@@ -52,6 +53,8 @@ export default class VirtualList extends PureComponent {
       0
     ),
   };
+
+  pauseScroll = false;
 
   _styleCache = {};
 
@@ -132,6 +135,20 @@ export default class VirtualList extends PureComponent {
 
     if (typeof onScroll === 'function') {
       onScroll(offset, e);
+    }
+  };
+
+  handleWheel = e => {
+    const offset = this.getNodeOffset();
+    const size = this.sizeAndPositionManager.getTotalSize();
+    const height = this.props.height;
+
+    if (size < height || offset + height >= size) {
+      this.pauseScroll = false;
+    } else if (e.deltaY < 0) {
+      // Only pause for scroll up
+      if (this.lastScroll) this.lastScroll.cancel();
+      this.pauseScroll = true;
     }
   };
 
@@ -260,6 +277,7 @@ export default class VirtualList extends PureComponent {
         ref={this._getRef}
         {...props}
         onScroll={this.handleScroll}
+        onWheel={this.handleWheel}
         style={wrapperStyle}
       >
         <div

@@ -179,7 +179,7 @@ export default class VirtualList extends PureComponent {
     return this._styleCache[index] = {
       ...STYLE_ITEM,
       [sizeProp[scrollDirection]]: size,
-      [positionProp[scrollDirection]]: offset,
+      transform: `${positionProp[scrollDirection]}(${offset}px)`,
     };
   }
 

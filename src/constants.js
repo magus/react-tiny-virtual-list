@@ -13,6 +13,6 @@ export const sizeProp = {
   [DIRECTION_HORIZONTAL]: 'width',
 };
 export const positionProp = {
-  [DIRECTION_VERTICAL]: 'top',
-  [DIRECTION_HORIZONTAL]: 'left',
+  [DIRECTION_VERTICAL]: 'translateY',
+  [DIRECTION_HORIZONTAL]: 'translateX',
 };

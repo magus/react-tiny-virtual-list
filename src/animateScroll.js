@@ -1,4 +1,8 @@
-const rAF = window.requestAnimationFrame;
+const rAF = (
+  typeof(window) === 'object'
+  ? window.requestAnimationFrame
+  : callback => setTimeout(callback, 1000 / 60)
+);
 
 function easeInOutQuad(t, b, c, d) {
   t /= d / 2;

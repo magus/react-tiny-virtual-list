@@ -106,16 +106,12 @@ export default class VirtualList extends PureComponent {
     }
 
     if (nextProps.scrollOffset !== scrollOffset) {
-      this.setState({
-        offset: nextProps.scrollOffset,
-      });
+      this.setOffset(nextProps.scrollOffset);
     } else if (
       scrollPropsHaveChanged ||
       nextProps.scrollToIndex && itemPropsHaveChanged
     ) {
-      this.setState({
-        offset: this.getOffsetForIndex(nextProps.scrollToIndex, nextProps.scrollToAlignment, nextProps.itemCount),
-      });
+      this.setOffset(this.getOffsetForIndex(nextProps.scrollToIndex, nextProps.scrollToAlignment, nextProps.itemCount));
     }
   }
 
@@ -156,12 +152,24 @@ export default class VirtualList extends PureComponent {
     return props.estimatedItemSize || typeof props.itemSize === "number" && props.itemSize || 50;
   }
 
+  setOffset(offset) {
+    if (this.pauseScroll) return;
+
+    this.setState({ offset: offset });
+  }
+
+  setPauseScroll(pause) {
+    this.pauseScroll = pause;
+  }
+
   getNodeOffset() {
     const {scrollDirection} = this.props;
     return this.rootNode[scrollProp[scrollDirection]];
   }
 
   scrollTo(value) {
+    if (this.pauseScroll) return;
+
     const { scrollDirection, animate } = this.props;
     const currentScroll = this.rootNode[scrollProp[scrollDirection]];
 

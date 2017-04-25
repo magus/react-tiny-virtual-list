@@ -57,8 +57,7 @@ export default function animateScroll(element, to, duration, timing = linear) {
 
       if (now > animationStart + duration) {
         element.scrollTop = to;
-        animating = false;
-        resolve();
+        finish();
       }
     }
 

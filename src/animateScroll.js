@@ -25,7 +25,7 @@ export default function animateScroll(element, to, duration, timing = linear) {
   const animationStart = +new Date();
 
   let animating = true;
-  let lastpos = null;
+  let lastpos = start;
 
   const promise = new Promise((resolve, reject) => {
     function finish() {
@@ -65,6 +65,7 @@ export default function animateScroll(element, to, duration, timing = linear) {
   });
 
   return {
+    info: () => ({ animating, lastpos, to }),
     then: promise.then.bind(promise),
     cancel: () => {
       animating = false;

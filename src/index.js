@@ -22,6 +22,7 @@ export default class VirtualList extends PureComponent {
     overscanCount: 3,
     scrollDirection: DIRECTION_VERTICAL,
     width: '100%',
+    animationDuration: 200,
   };
 
   static propTypes = {
@@ -38,6 +39,7 @@ export default class VirtualList extends PureComponent {
     width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     displayBottomUpwards: PropTypes.bool,
     animate: PropTypes.bool,
+    animationDuration: PropTypes.number,
   }
 
   sizeAndPositionManager = new SizeAndPositionManager({
@@ -170,7 +172,7 @@ export default class VirtualList extends PureComponent {
   scrollTo(value) {
     if (this.pauseScroll) return;
 
-    const { scrollDirection, animate } = this.props;
+    const { scrollDirection, animate, animationDuration } = this.props;
     const currentScroll = this.rootNode[scrollProp[scrollDirection]];
 
     if (currentScroll === value) return;
@@ -182,7 +184,7 @@ export default class VirtualList extends PureComponent {
 
     // Animate scroll offset
     if (this.lastScroll) this.lastScroll.cancel();
-    this.lastScroll = animateScroll(this.rootNode, value, 1000);
+    this.lastScroll = animateScroll(this.rootNode, value, animationDuration);
 
   }
 
@@ -244,6 +246,7 @@ export default class VirtualList extends PureComponent {
       width,
       displayBottomUpwards,
       animate,
+      animationDuration,
       ...props
     } = this.props;
     const {offset} = this.state;
@@ -277,7 +280,7 @@ export default class VirtualList extends PureComponent {
       innerStyle.minHeight = '0';
 
       // Transition height up until it maxes out
-      if (animate && totalSize < height) innerStyle.transition = 'height 1s ease';
+      if (animate && totalSize < height) innerStyle.transition = `height ${animationDuration / 1000}s ease`;
     }
 
     return (
